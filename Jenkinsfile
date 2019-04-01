@@ -33,4 +33,8 @@ node {
             app.push("latest")
         }
     }
+
+        stage('Send Rocket Chat Message') {
+            sh "curl -i -H \"X-Auth-Token: b-EYSzcBzvNjuJe02wOSp-n9fNE2ecYUioVro0Weqy6\" -H \"X-User-Id: DdkKdpdc5siNmJap5\" -H \"Content-type:application/json\" https://chat.internal.ypto.space/api/v1/chat.postMessage  -d '{ \"channel\": \"#general\", \"text\": \"Test bot for infra\" }'"
+        }
 }
