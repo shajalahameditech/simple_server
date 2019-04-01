@@ -1,3 +1,2 @@
-FROM scratch
-ADD main /
-CMD ["/main"]
+FROM nginx:alpine
+COPY . /usr/share/nginx/html
