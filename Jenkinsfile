@@ -1,37 +1,39 @@
-node {
-    def app
+#!groovy​
+podTemplate(label: 'web-app', containers: [
+    containerTemplate(name: 'webpage', image: 'shajalahamedcse/webpage', ttyEnabled: true, command: 'cat'),
 
-    stage('Clone repository') {
-        /* Let's make sure we have the repository cloned to our workspace */
+    containerTemplate(name: 'kubectl', image: 'shajal/kubectl', ttyEnabled: true, command: 'cat',
+        volumes: [secretVolume(secretName: 'kube-config', mountPath: '/root/.kube')]),
+    containerTemplate(name: 'docker', image: 'docker', ttyEnabled: true, command: 'cat',
+        envVars: [containerEnvVar(key: 'DOCKER_CONFIG', value: '/tmp/'),])],
+        volumes: [secretVolume(secretName: 'docker-config', mountPath: '/tmp'),
+                  hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
+  ]) {
 
-        checkout scm
-    }
+    node('pod-hugo-app') {
 
-    stage('Build image') {
-        /* This builds the actual image; synonymous to
-         * docker build on the command line */
+        def DOCKER_HUB_ACCOUNT = 'shajalahamedcse'
+        def DOCKER_IMAGE_NAME = 'webpage'
+        def K8S_DEPLOYMENT_NAME = 'web-app'
 
-        app = docker.build("shajalahamedcse/webpage")
-    }
+        stage('Clone Hugo App Repository') {
+            checkout scm
 
-    stage('Test image') {
-        /* Ideally, we would run a test framework against our image.
-         * Just an example */
+            container('docker') {
+                stage('Docker Build & Push Current & Latest Versions') {
+                    sh ("docker build -t ${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} .")
+                    sh ("docker push ${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}")
+                    sh ("docker tag ${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} ${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:latest")
+                    sh ("docker push ${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:latest")
+                }
+            }
 
-        app.inside {
-            sh 'echo "Tests passed"'
+            container('kubectl') {
+                stage('Deploy New Build To Kubernetes') {
+                    sh ("kubectl set image deployment/${K8S_DEPLOYMENT_NAME} ${K8S_DEPLOYMENT_NAME}=${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}")
+                }
+            }
+
         }
     }
-
-    stage('Push image') {
-        /* Finally, we'll push the image with two tags:
-         * First, the incremental build number from Jenkins
-         * Second, the 'latest' tag.
-         * Pushing multiple tags is cheap, as all the layers are reused. */
-        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
-            app.push("${env.BUILD_NUMBER}")
-            app.push("latest")
-        }
-    }
-
 }
