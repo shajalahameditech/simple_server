@@ -1,24 +1,37 @@
 pipeline {
     agent {label 'jenkins_slave'}
+     stage('Clone repository') {
+            /* Let's make sure we have the repository cloned to our workspace */
 
-    environment {
-          DOCKER_HUB_ACCOUNT="shajal"
-          DOCKER_IMAGE_NAME="webpage"
-          K8S_DEPLOYMENT_NAME="webapp"
-       }
+            checkout scm
+        }
 
-    stages {
-        stage('Docker Build and push') {
-            steps {
+        stage('Build image') {
+            /* This builds the actual image; synonymous to
+             * docker build on the command line */
 
-                echo 'Building..'
-                sh ("sudo docker build -t ${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} .")
-                sh ("sudo docker push ${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}")
-                sh ("sudo docker tag ${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} ${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:latest")
-                sh ("sudo docker push ${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:latest")
+            app = docker.build("shajalahamedcse/webpage")
+        }
 
+        stage('Test image') {
+            /* Ideally, we would run a test framework against our image.
+             * Just an example */
+
+            app.inside {
+                sh 'echo "Tests passed"'
             }
         }
-    }
+
+        stage('Push image') {
+            /* Finally, we'll push the image with two tags:
+             * First, the incremental build number from Jenkins
+             * Second, the 'latest' tag.
+             * Pushing multiple tags is cheap, as all the layers are reused. */
+            docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
+                app.push("${env.BUILD_NUMBER}")
+                app.push("latest")
+            }
+        }
+
 
 }
