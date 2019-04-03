@@ -1,36 +1,24 @@
 pipeline {
-  environment {
-    registry = "shajalahamedcse/webpage"
-    registryCredential = 'dockerhub'
-    dockerImage = ''
-  }
-  agent {label 'jenkins_slave'}
-  stages {
-    stage('Cloning Git') {
-      steps {
-        git 'https://github.com/shajalahameditech/simple_server'
-      }
-    }
-    stage('Building image') {
-      steps{
-        script {
-          dockerImage = docker.build registry + ":$BUILD_NUMBER"
+    agent {label 'jenkins_slave'}
+
+    environment {
+          DOCKER_HUB_ACCOUNT="shajal"
+          DOCKER_IMAGE_NAME="webpage"
+          K8S_DEPLOYMENT_NAME="webapp"
+       }
+
+    stages {
+        stage('Docker Build and push') {
+            steps {
+                echo 'Building..'
+                sh ("sudo docker login -u="$DOCKER_USERNAME" -p="sha01688459466"")
+                sh ("sudo docker build -t ${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} .")
+                sh ("sudo docker push ${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}")
+                sh ("sudo docker tag ${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} ${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:latest")
+                sh ("sudo docker push ${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:latest")
+
+            }
         }
-      }
     }
-    stage('Deploy Image') {
-      steps{
-        script {
-          docker.withRegistry( '', registryCredential ) {
-            dockerImage.push()
-          }
-        }
-      }
-    }
-    stage('Remove Unused docker image') {
-      steps{
-        sh "docker rmi $registry:$BUILD_NUMBER"
-      }
-    }
-  }
+
 }
