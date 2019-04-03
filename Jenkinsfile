@@ -26,6 +26,7 @@ pipeline {
             steps {
                 sh("pwd")
                 sh("kubectl get nodes")
+                sh("kubectl set image deployment/${K8S_DEPLOYMENT_NAME} ${K8S_DEPLOYMENT_NAME}=${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}")
             }
         }
     }
