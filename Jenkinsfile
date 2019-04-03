@@ -3,11 +3,9 @@ pipeline {
 
     stages {
         stage('Build') {
-            agent { label 'slave-node​' }
             steps {
                 echo 'Building..'
-                sh '''
-                '''
+
             }
         }
     }
