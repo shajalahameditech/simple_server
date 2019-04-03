@@ -13,7 +13,7 @@ pipeline {
         stage('Docker Build and push') {
             steps {
                 echo 'Building..'
-                sh ("sudo docker login -u=${DOCKER_HUB_ACCOUNT} -p=${PASS})
+                sh ("sudo docker login -u=${DOCKER_HUB_ACCOUNT} -p=${PASS}")
                 sh ("sudo docker build -t ${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} .")
                 sh ("sudo docker push ${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}")
                 sh ("sudo docker tag ${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} ${DOCKER_HUB_ACCOUNT}/${DOCKER_IMAGE_NAME}:latest")
