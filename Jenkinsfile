@@ -4,7 +4,7 @@ pipeline {
     registryCredential = 'dockerhub'
     dockerImage = ''
   }
-  agent {label ''}
+  agent {label 'kubernetes-deploy'}
   stages {
     stage('Cloning Git') {
       steps {
