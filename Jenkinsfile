@@ -1,5 +1,6 @@
 pipeline {
     agent {label 'jenkins_slave'}
+    stages{
      stage('Clone repository') {
             /* Let's make sure we have the repository cloned to our workspace */
 
@@ -33,5 +34,5 @@ pipeline {
             }
         }
 
-
+}
 }
