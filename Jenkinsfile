@@ -10,13 +10,15 @@ podTemplate(label: 'web-app', containers: [
                   hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
   ]) {
 
-    node('pod-hugo-app') {
+    node('kubernetes-deploy') {
 
         def DOCKER_HUB_ACCOUNT = 'shajalahamedcse'
         def DOCKER_IMAGE_NAME = 'webpage'
         def K8S_DEPLOYMENT_NAME = 'web-app'
 
-        stage('Clone Hugo App Repository') {
+
+
+        stage('Clone App Repository') {
             checkout scm
 
             container('docker') {
