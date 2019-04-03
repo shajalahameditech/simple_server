@@ -24,6 +24,7 @@ pipeline {
 
         stage("Get Kuber Node"){
             steps {
+                sh("pwd")
                 sh("kubectl get nodes")
             }
         }
