@@ -21,6 +21,12 @@ pipeline {
 
             }
         }
+
+        stage("Get Kuber Node"){
+            steps {
+                sh("kubectl get nodes")
+            }
+        }
     }
 
 }
