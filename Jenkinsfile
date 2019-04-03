@@ -5,13 +5,14 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building..'
-                sh " kubectl get nodes"
+
             }
         }
     }
 
     post {
         success {
+            sh "kubectl get nodes"
             echo 'This will run only if successful'
         }
     }
