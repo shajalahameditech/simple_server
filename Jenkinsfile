@@ -1,5 +1,5 @@
 pipeline {
-    agent {label 'kubernetes-deploy'}
+    agent {label 'jenkins_slave'}
 
     stages {
         stage('Build') {
