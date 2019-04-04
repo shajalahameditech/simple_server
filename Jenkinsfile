@@ -6,7 +6,7 @@ pipeline {
           DOCKER_HUB_ACCOUNT="shajalahamedcse"
           DOCKER_IMAGE_NAME="webpage"
           K8S_DEPLOYMENT_NAME="webapp"
-          PASS="sha01688459466"
+          PASS=""
        }
 
     stages {
